@@ -2,6 +2,7 @@ import { useState } from 'react';
 import InteractiveAiHero from './InteractiveAiHero';
 import TomorrowDemandCard from './TomorrowDemandCard';
 import BatteryAvailabilityCard from './BatteryAvailabilityCard';
+import LocalProductionForecastCard from './LocalProductionForecastCard';
 import WeatherImpactCard from './WeatherImpactCard';
 import CalendarEventsCard from './CalendarEventsCard';
 import MarketPriceCard from './MarketPriceCard';
@@ -147,7 +148,9 @@ export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: Dashb
 
         {/* Row 2: Local Production Forecast + Weather Impact */}
         <div className="grid grid-cols-2 gap-[20px]">
-          <PlaceholderCard title="Local Production Forecast" />
+          <div className="h-[380px]">
+            <LocalProductionForecastCard />
+          </div>
           <div className="h-[380px]">
             <WeatherImpactCard />
           </div>
