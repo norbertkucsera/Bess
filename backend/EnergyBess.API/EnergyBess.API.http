@@ -1,0 +1,6 @@
+@EnergyBess.API_HostAddress = http://localhost:5077
+
+GET {{EnergyBess.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

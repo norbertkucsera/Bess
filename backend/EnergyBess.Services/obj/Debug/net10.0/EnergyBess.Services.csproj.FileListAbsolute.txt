@@ -1,0 +1,15 @@
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.csproj.AssemblyReference.cache
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.AssemblyInfoInputs.cache
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.AssemblyInfo.cs
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.csproj.CoreCompileInputs.cache
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\bin\Debug\net10.0\EnergyBess.Services.deps.json
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\bin\Debug\net10.0\EnergyBess.Services.dll
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\bin\Debug\net10.0\EnergyBess.Services.pdb
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\bin\Debug\net10.0\EnergyBess.Domain.dll
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\bin\Debug\net10.0\EnergyBess.Domain.pdb
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBe.2BE44E70.Up2Date
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.dll
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\refint\EnergyBess.Services.dll
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\EnergyBess.Services.pdb
+C:\hackathon-april-2026\src\energy-bess\backend\EnergyBess.Services\obj\Debug\net10.0\ref\EnergyBess.Services.dll
