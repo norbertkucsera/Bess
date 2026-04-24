@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "tlf05enBVDg=",
+  "dgSpecHash": "7nbSX+TPqXQ=",
   "success": true,
-  "projectFilePath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
+  "projectFilePath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
@@ -53,9 +53,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
-      "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
+      "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
+      "filePath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
       "libraryId": "System.Security.Cryptography.Xml",
       "targetGraphs": [
         "net10.0"
@@ -65,9 +65,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
-      "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
+      "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
+      "filePath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Services\\EnergyBess.Services.csproj",
       "libraryId": "System.Security.Cryptography.Xml",
       "targetGraphs": [
         "net10.0"

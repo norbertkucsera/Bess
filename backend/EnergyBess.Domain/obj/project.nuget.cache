@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "76UQuhFlYOk=",
+  "dgSpecHash": "o8p2HnrTTJI=",
   "success": true,
-  "projectFilePath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
+  "projectFilePath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\10.0.7\\microsoft.aspnetcore.cryptography.internal.10.0.7.nupkg.sha512",
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\10.0.7\\microsoft.aspnetcore.cryptography.keyderivation.10.0.7.nupkg.sha512",

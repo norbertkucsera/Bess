@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8DOb1ziBgUM=",
+  "dgSpecHash": "6D1Sb+udQMY=",
   "success": true,
-  "projectFilePath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.API\\EnergyBess.API.csproj",
+  "projectFilePath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.API\\EnergyBess.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

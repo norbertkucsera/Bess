@@ -865,11 +865,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
+      "projectUniqueName": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
       "projectName": "EnergyBess.Domain",
-      "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
+      "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
       "packagesPath": "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\",
-      "outputPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\obj\\",
+      "outputPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

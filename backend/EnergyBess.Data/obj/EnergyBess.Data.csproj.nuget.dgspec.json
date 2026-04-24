@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj": {}
+    "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj": {}
   },
   "projects": {
-    "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj": {
+    "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj",
+        "projectUniqueName": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj",
         "projectName": "EnergyBess.Data",
-        "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj",
+        "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Data\\EnergyBess.Data.csproj",
         "packagesPath": "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\",
-        "outputPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Data\\obj\\",
+        "outputPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Data\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -33,8 +33,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj": {
-                "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj"
+              "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj": {
+                "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj"
               }
             }
           }
@@ -365,14 +365,14 @@
         }
       }
     },
-    "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj": {
+    "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
+        "projectUniqueName": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
         "projectName": "EnergyBess.Domain",
-        "projectPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
+        "projectPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\EnergyBess.Domain.csproj",
         "packagesPath": "C:\\Users\\Sorin.Fitero\\.nuget\\packages\\",
-        "outputPath": "C:\\hackathon-april-2026\\src\\energy-bess\\backend\\EnergyBess.Domain\\obj\\",
+        "outputPath": "C:\\hackathon-april-2026\\norbi-repo\\Bess\\backend\\EnergyBess.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
