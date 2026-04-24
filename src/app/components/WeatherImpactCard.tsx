@@ -186,24 +186,29 @@ export default function WeatherImpactCard() {
     longitude: 23.6236,
     country: 'Romania',
   });
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const forecastDays = 7;
 
   useEffect(() => {
     const fetchWeatherData = async () => {
       setIsLoading(true);
+      setCurrentDayIndex(0);
       try {
         const response = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${selectedLocation.latitude}&longitude=${selectedLocation.longitude}&daily=temperature_2m_max,temperature_2m_min,windspeed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=1`
+          `https://api.open-meteo.com/v1/forecast?latitude=${selectedLocation.latitude}&longitude=${selectedLocation.longitude}&daily=temperature_2m_max,temperature_2m_min,windspeed_10m_max,shortwave_radiation_sum&timezone=auto&forecast_days=${forecastDays}`
         );
         const data = await response.json();
 
-        setWeatherData({
-          temperature_min: Math.round(data.daily.temperature_2m_min[0]),
-          temperature_max: Math.round(data.daily.temperature_2m_max[0]),
-          windspeed: Math.round(data.daily.windspeed_10m_max[0]),
-          shortwave_radiation: Math.round(data.daily.shortwave_radiation_sum[0] / 24), // Average W/m²
-        });
+        const forecastData = Array.from({ length: forecastDays }, (_, i) => ({
+          temperature_min: Math.round(data.daily.temperature_2m_min[i]),
+          temperature_max: Math.round(data.daily.temperature_2m_max[i]),
+          windspeed: Math.round(data.daily.windspeed_10m_max[i]),
+          shortwave_radiation: Math.round(data.daily.shortwave_radiation_sum[i] / 24), // Average W/m²
+        }));
+
+        setWeatherData(forecastData);
       } catch (error) {
         console.error('Error fetching weather data:', error);
       } finally {
@@ -216,9 +221,10 @@ export default function WeatherImpactCard() {
 
   // Calculate demand impact based on temperature
   const calculateDemandImpact = () => {
-    if (!weatherData) return { change: '+0%', impact: 'Calculating...', description: 'Loading weather data...', tags: [] };
+    if (!weatherData || weatherData.length === 0) return { change: '+0%', impact: 'Calculating...', description: 'Loading weather data...', tags: [] };
 
-    const avgTemp = (weatherData.temperature_min + weatherData.temperature_max) / 2;
+    const currentWeather = weatherData[currentDayIndex];
+    const avgTemp = (currentWeather.temperature_min + currentWeather.temperature_max) / 2;
     let demandChange = 0;
     let impact = '';
     let description = '';
@@ -252,12 +258,12 @@ export default function WeatherImpactCard() {
     }
 
     // Add wind-based tag
-    if (weatherData.windspeed > 25) {
+    if (currentWeather.windspeed > 25) {
       tags.push('High wind');
     }
 
     // Add solar radiation tag
-    if (weatherData.shortwave_radiation > 400) {
+    if (currentWeather.shortwave_radiation > 400) {
       tags.push('Good solar');
     }
 
@@ -266,7 +272,28 @@ export default function WeatherImpactCard() {
     return { change: changeStr + ' demand', impact, description, tags };
   };
 
+  const getDayLabel = (index: number) => {
+    if (index === 0) return 'Tomorrow';
+    if (index === 1) return 'In 2 days';
+    const date = new Date();
+    date.setDate(date.getDate() + index + 1);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const handlePreviousDay = () => {
+    if (currentDayIndex > 0) {
+      setCurrentDayIndex(currentDayIndex - 1);
+    }
+  };
+
+  const handleNextDay = () => {
+    if (currentDayIndex < weatherData.length - 1) {
+      setCurrentDayIndex(currentDayIndex + 1);
+    }
+  };
+
   const impactData = calculateDemandImpact();
+  const currentWeather = weatherData[currentDayIndex];
 
   const getTagColor = (tag: string) => {
     if (tag.toLowerCase().includes('cold') || tag.toLowerCase().includes('heating') || tag.toLowerCase().includes('peak')) {
@@ -288,9 +315,39 @@ export default function WeatherImpactCard() {
           <p className="font-['Sora:SemiBold',sans-serif] font-semibold leading-[1.12] relative shrink-0 text-[#ecf4ff] text-[17px]">
             Weather Impact
           </p>
-          <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.35] relative shrink-0 text-[#7c93b4] text-[12px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Demand modifiers for tomorrow
-          </p>
+          <div className="flex items-center gap-[10px]">
+            <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.35] relative shrink-0 text-[#7c93b4] text-[12px]" style={{ fontVariationSettings: "'wdth' 100" }}>
+              Demand modifiers for {getDayLabel(currentDayIndex).toLowerCase()}
+            </p>
+            <div className="flex items-center gap-[6px]">
+              <button
+                onClick={handlePreviousDay}
+                disabled={currentDayIndex === 0}
+                className={`w-[24px] h-[24px] flex items-center justify-center rounded-[6px] transition-all ${
+                  currentDayIndex === 0
+                    ? 'bg-[rgba(37,53,79,0.3)] cursor-not-allowed opacity-40'
+                    : 'bg-[rgba(68,180,255,0.14)] hover:bg-[rgba(68,180,255,0.24)] cursor-pointer'
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M7.5 3L4.5 6L7.5 9" stroke="#44b4ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                onClick={handleNextDay}
+                disabled={currentDayIndex === weatherData.length - 1}
+                className={`w-[24px] h-[24px] flex items-center justify-center rounded-[6px] transition-all ${
+                  currentDayIndex === weatherData.length - 1
+                    ? 'bg-[rgba(37,53,79,0.3)] cursor-not-allowed opacity-40'
+                    : 'bg-[rgba(68,180,255,0.14)] hover:bg-[rgba(68,180,255,0.24)] cursor-pointer'
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M4.5 3L7.5 6L4.5 9" stroke="#44b4ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
         <div className="bg-[rgba(68,180,255,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0">
           <div aria-hidden="true" className="absolute border border-[rgba(68,180,255,0.6)] border-solid inset-0 pointer-events-none rounded-[999px]" />
@@ -315,17 +372,17 @@ export default function WeatherImpactCard() {
       <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
         <MetricCard
           title="Temperature"
-          value={weatherData ? `${weatherData.temperature_min}°C to ${weatherData.temperature_max}°C` : '—'}
+          value={currentWeather ? `${currentWeather.temperature_min}°C to ${currentWeather.temperature_max}°C` : '—'}
           isLoading={isLoading}
         />
         <MetricCard
           title="Wind speed"
-          value={weatherData ? `${weatherData.windspeed} km/h` : '—'}
+          value={currentWeather ? `${currentWeather.windspeed} km/h` : '—'}
           isLoading={isLoading}
         />
         <MetricCard
           title="Solar irradiation"
-          value={weatherData ? `${weatherData.shortwave_radiation} W/m²` : '—'}
+          value={currentWeather ? `${currentWeather.shortwave_radiation} W/m²` : '—'}
           isLoading={isLoading}
         />
       </div>

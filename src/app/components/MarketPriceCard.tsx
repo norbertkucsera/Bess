@@ -208,8 +208,8 @@ export default function MarketPriceCard() {
       setError(null);
 
       try {
-        // Load CSV file
-        const response = await fetch('/src/imports/energy-charts_Electricity_production_and_spot_prices_in_Romania_in_week_17_2026.csv');
+        // Fetch CSV data from public directory
+        const response = await fetch('/energy-prices.csv');
 
         if (!response.ok) {
           throw new Error('Failed to load price data');
@@ -220,23 +220,28 @@ export default function MarketPriceCard() {
 
         // Parse CSV and aggregate by hour
         const hourlyData: { [hour: number]: number[] } = {};
+        let parsedCount = 0;
 
         lines.forEach(line => {
           if (!line.trim()) return;
 
-          // Better CSV parsing - handle quotes properly
-          const match = line.match(/^"?([^"]+)"?,([^,]+),([^,]+),([^,]+),([^,]+)/);
-          if (!match) return;
+          // Split by comma (simple approach for this CSV format)
+          const parts = line.split(',');
+          if (parts.length < 5) return;
 
-          const dateTimeStr = match[1];
-          const priceStr = match[5];
+          const dateTimeStr = parts[0];
+          const priceStr = parts[4];
           const price = parseFloat(priceStr);
 
-          if (!dateTimeStr || isNaN(price) || price <= 0) return;
+          if (!dateTimeStr || isNaN(price) || price <= 0) {
+            return;
+          }
 
           // Extract hour from ISO datetime like "2026-04-20T14:00+03:00"
           const hourMatch = dateTimeStr.match(/T(\d{2}):/);
-          if (!hourMatch) return;
+          if (!hourMatch) {
+            return;
+          }
 
           const hour = parseInt(hourMatch[1]);
 
@@ -244,7 +249,10 @@ export default function MarketPriceCard() {
             hourlyData[hour] = [];
           }
           hourlyData[hour].push(price);
+          parsedCount++;
         });
+
+        console.log(`Parsed ${parsedCount} price entries from CSV`);
 
         // Calculate average for each hour
         const hourlyPrices = Array.from({ length: 24 }, (_, hour) => {
@@ -258,10 +266,13 @@ export default function MarketPriceCard() {
           };
         });
 
+        console.log('Hourly data:', Object.keys(hourlyData).length, 'hours with data');
         const validPrices = hourlyPrices.map(h => h.price).filter(p => p > 0);
+        console.log('Valid prices:', validPrices.length, 'out of', hourlyPrices.length);
 
         // Ensure we have valid data
         if (validPrices.length === 0) {
+          console.error('Hourly prices:', hourlyPrices);
           throw new Error('No valid price data found in CSV');
         }
 

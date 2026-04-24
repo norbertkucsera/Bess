@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="EnergyBess.API/EnergyBess.API.csproj" />
-  <Project Path="EnergyBess.Data/EnergyBess.Data.csproj" />
-  <Project Path="EnergyBess.Domain/EnergyBess.Domain.csproj" />
-  <Project Path="EnergyBess.Services/EnergyBess.Services.csproj" />
-</Solution>

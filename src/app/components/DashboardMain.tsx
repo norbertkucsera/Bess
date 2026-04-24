@@ -2,12 +2,13 @@ import { useState } from 'react';
 import InteractiveAiHero from './InteractiveAiHero';
 import TomorrowDemandCard from './TomorrowDemandCard';
 import BatteryAvailabilityCard from './BatteryAvailabilityCard';
-import LocalProductionForecastCard from './LocalProductionForecastCard';
 import WeatherImpactCard from './WeatherImpactCard';
 import CalendarEventsCard from './CalendarEventsCard';
 import MarketPriceCard from './MarketPriceCard';
 import RiskImbalanceCard from './RiskImbalanceCard';
 import FinancialImpactCard from './FinancialImpactCard';
+
+export type TimeHorizon = 'Tomorrow' | 'Next Week' | 'Next Month';
 
 interface DashboardMainProps {
   selectedPortfolio: string;
@@ -60,28 +61,57 @@ function Pill({ label, color = 'blue', dot = false, onClick }: {
   );
 }
 
-function Controls({ selectedPortfolio, setSelectedPortfolio }: {
+function Controls({
+  selectedPortfolio,
+  setSelectedPortfolio,
+  timeHorizon,
+  setTimeHorizon
+}: {
   selectedPortfolio: string;
-  setSelectedPortfolio: (p: string) => void
+  setSelectedPortfolio: (p: string) => void;
+  timeHorizon: TimeHorizon;
+  setTimeHorizon: (t: TimeHorizon) => void;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPortfolioOpen, setIsPortfolioOpen] = useState(false);
+  const [isTimeOpen, setIsTimeOpen] = useState(false);
   const portfolios = ['Portfolio North-East', 'Cluj Portfolio', 'Bucharest Portfolio'];
+  const timeHorizons: TimeHorizon[] = ['Tomorrow', 'Next Week', 'Next Month'];
 
   return (
     <div className="content-stretch flex gap-[12px] items-center justify-center relative shrink-0">
-      <Pill label="Tomorrow" color="blue" />
       <div className="relative">
-        <div onClick={() => setIsOpen(!isOpen)}>
+        <div onClick={() => setIsTimeOpen(!isTimeOpen)}>
+          <Pill label={timeHorizon} color="blue" />
+        </div>
+        {isTimeOpen && (
+          <div className="absolute top-full mt-2 bg-[#162033] border border-[#25354f] rounded-[12px] p-2 min-w-[140px] z-50">
+            {timeHorizons.map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setTimeHorizon(t);
+                  setIsTimeOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 text-[#ecf4ff] text-[12px] hover:bg-[rgba(68,180,255,0.14)] rounded-[8px] transition-colors font-['IBM_Plex_Sans:Medium',sans-serif]"
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="relative">
+        <div onClick={() => setIsPortfolioOpen(!isPortfolioOpen)}>
           <Pill label={selectedPortfolio} color="teal" />
         </div>
-        {isOpen && (
+        {isPortfolioOpen && (
           <div className="absolute top-full mt-2 bg-[#162033] border border-[#25354f] rounded-[12px] p-2 min-w-[180px] z-50">
             {portfolios.map((p) => (
               <button
                 key={p}
                 onClick={() => {
                   setSelectedPortfolio(p);
-                  setIsOpen(false);
+                  setIsPortfolioOpen(false);
                 }}
                 className="w-full text-left px-3 py-2 text-[#ecf4ff] text-[12px] hover:bg-[rgba(59,217,164,0.14)] rounded-[8px] transition-colors font-['IBM_Plex_Sans:Medium',sans-serif]"
               >
@@ -97,14 +127,26 @@ function Controls({ selectedPortfolio, setSelectedPortfolio }: {
   );
 }
 
-function Header({ selectedPortfolio, setSelectedPortfolio }: {
+function Header({
+  selectedPortfolio,
+  setSelectedPortfolio,
+  timeHorizon,
+  setTimeHorizon
+}: {
   selectedPortfolio: string;
-  setSelectedPortfolio: (p: string) => void
+  setSelectedPortfolio: (p: string) => void;
+  timeHorizon: TimeHorizon;
+  setTimeHorizon: (t: TimeHorizon) => void;
 }) {
   return (
     <div className="content-stretch flex items-center justify-between relative shrink-0 w-full mb-[30px]">
       <TitleStack />
-      <Controls selectedPortfolio={selectedPortfolio} setSelectedPortfolio={setSelectedPortfolio} />
+      <Controls
+        selectedPortfolio={selectedPortfolio}
+        setSelectedPortfolio={setSelectedPortfolio}
+        timeHorizon={timeHorizon}
+        setTimeHorizon={setTimeHorizon}
+      />
     </div>
   );
 }
@@ -125,9 +167,16 @@ function PlaceholderCard({ title }: { title: string }) {
 }
 
 export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: DashboardMainProps) {
+  const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('Tomorrow');
+
   return (
     <div className="w-full min-h-screen px-[40px] py-[38px]">
-      <Header selectedPortfolio={selectedPortfolio} setSelectedPortfolio={setSelectedPortfolio} />
+      <Header
+        selectedPortfolio={selectedPortfolio}
+        setSelectedPortfolio={setSelectedPortfolio}
+        timeHorizon={timeHorizon}
+        setTimeHorizon={setTimeHorizon}
+      />
 
       {/* Card Grid */}
       <div className="flex flex-col gap-[20px]">
@@ -148,9 +197,7 @@ export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: Dashb
 
         {/* Row 2: Local Production Forecast + Weather Impact */}
         <div className="grid grid-cols-2 gap-[20px]">
-          <div className="h-[380px]">
-            <LocalProductionForecastCard />
-          </div>
+          <PlaceholderCard title="Local Production Forecast" />
           <div className="h-[380px]">
             <WeatherImpactCard />
           </div>
