@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EnergyBess.Data")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19a74a2fc7b85d8c2f348c467a7b3f242beb5ae6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+42627c824173e99707d507dfd223ae6a6e22d258")]
 [assembly: System.Reflection.AssemblyProductAttribute("EnergyBess.Data")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EnergyBess.Data")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
