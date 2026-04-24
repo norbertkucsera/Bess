@@ -25,16 +25,46 @@ app.get("/make-server-cfbfb431/health", (c) => {
 });
 
 // Envitron API integration
-let envitronToken: string | null = null;
+let envitronAccessToken: string | null = null;
+let envitronRefreshToken: string | null = null;
 let tokenExpiry: number = 0;
 
 // Authenticate with Envitron API
 async function getEnvitronToken(): Promise<string> {
   // Check if we have a valid token
-  if (envitronToken && Date.now() < tokenExpiry) {
-    return envitronToken;
+  if (envitronAccessToken && Date.now() < tokenExpiry) {
+    return envitronAccessToken;
   }
 
+  // Try to refresh token first if we have a refresh token
+  if (envitronRefreshToken) {
+    try {
+      console.log('Attempting to refresh Envitron token');
+      const refreshResponse = await fetch('https://api.envitron.nl/public-api/token/refresh/', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh: envitronRefreshToken }),
+      });
+
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        envitronAccessToken = data.access;
+        envitronRefreshToken = data.refresh;
+        tokenExpiry = Date.now() + (14 * 60 * 1000);
+        console.log('Successfully refreshed Envitron token');
+        return envitronAccessToken;
+      } else {
+        console.log(`Token refresh failed: ${refreshResponse.status}, will get new token`);
+      }
+    } catch (error) {
+      console.log(`Token refresh error: ${error}, will get new token`);
+    }
+  }
+
+  // Get new token
   const username = Deno.env.get('ENVITRON_EMAIL');
   const password = Deno.env.get('ENVITRON_PASSWORD');
 
@@ -43,6 +73,7 @@ async function getEnvitronToken(): Promise<string> {
   }
 
   try {
+    console.log('Getting new Envitron token');
     const response = await fetch('https://api.envitron.nl/public-api/token/', {
       method: 'POST',
       headers: {
@@ -59,17 +90,19 @@ async function getEnvitronToken(): Promise<string> {
     }
 
     const data = await response.json();
-    envitronToken = data.access || data.access_token || data.token;
+    envitronAccessToken = data.access;
+    envitronRefreshToken = data.refresh;
 
-    if (!envitronToken) {
+    if (!envitronAccessToken) {
       console.log(`Envitron authentication response: ${JSON.stringify(data)}`);
       throw new Error('No access token in authentication response');
     }
 
-    // Set token expiry to 14 minutes (tokens expire in 15 minutes based on API response)
+    // Set token expiry to 14 minutes (tokens expire in 15 minutes)
     tokenExpiry = Date.now() + (14 * 60 * 1000);
+    console.log('Successfully obtained new Envitron token');
 
-    return envitronToken;
+    return envitronAccessToken;
   } catch (error) {
     console.log(`Error authenticating with Envitron API: ${error}`);
     throw error;
@@ -190,8 +223,131 @@ app.get("/make-server-cfbfb431/battery-data", async (c) => {
   }
 });
 
-// Get market prices from ENTSO-E
+// Get market prices from energy-charts.info
 app.get("/make-server-cfbfb431/market-prices", async (c) => {
+  try {
+    // Calculate current week number
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const daysSinceStart = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+    const weekNumber = Math.ceil((daysSinceStart + startOfYear.getDay() + 1) / 7);
+
+    // Fetch data from energy-charts.info API for Romania
+    const url = `https://energy-charts.info/charts/price_spot_market/data/ro/week_${now.getFullYear()}_${weekNumber}.json`;
+    console.log('Fetching prices from:', url);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch price data: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Helper function to extract series name
+    const getSeriesName = (series: any): string => {
+      if (Array.isArray(series.name)) {
+        // Handle array format like [{'en': 'Day Ahead Auction (RO)', ...}]
+        return series.name[0]?.en || '';
+      } else if (typeof series.name === 'object' && series.name !== null) {
+        // Handle object format like {'en': 'Day Ahead Auction (RO)', ...}
+        return series.name.en || '';
+      } else {
+        // Handle string format
+        return series.name || '';
+      }
+    };
+
+    // Log available series for debugging
+    console.log(`Found ${data.length} series in data`);
+    data.forEach((series: any, index: number) => {
+      const nameStr = getSeriesName(series);
+      console.log(`Series ${index}: ${nameStr} (yAxis: ${series.yAxis})`);
+    });
+
+    // Find the Day Ahead Auction series (yAxis: 1)
+    let priceSeriesArray = data.find((series: any) => {
+      const nameStr = getSeriesName(series);
+      return nameStr && (nameStr.includes('Day Ahead') || nameStr.includes('Auction')) && series.yAxis === 1;
+    });
+
+    // Fallback: try to find any series on yAxis 1 (price axis)
+    if (!priceSeriesArray) {
+      console.log('Day Ahead series not found, trying any series on yAxis 1');
+      priceSeriesArray = data.find((series: any) => series.yAxis === 1);
+    }
+
+    if (!priceSeriesArray) {
+      const availableSeries = data.map((s: any) => ({
+        name: getSeriesName(s),
+        yAxis: s.yAxis
+      }));
+      console.log('No price series found on yAxis 1, available series:', availableSeries);
+      return c.json({
+        error: 'Price data not found in response',
+        availableSeries
+      }, 404);
+    }
+
+    console.log('Using price series:', getSeriesName(priceSeriesArray));
+
+    const timestamps = priceSeriesArray.xAxisValues || [];
+    const prices = priceSeriesArray.data || [];
+
+    // Aggregate to hourly data (data comes in 15-minute intervals)
+    const hourlyData: { [hour: number]: number[] } = {};
+
+    timestamps.forEach((timestamp: number, index: number) => {
+      const date = new Date(timestamp);
+      const hour = date.getHours();
+
+      if (!hourlyData[hour]) {
+        hourlyData[hour] = [];
+      }
+
+      const price = prices[index];
+      if (typeof price === 'number' && !isNaN(price)) {
+        hourlyData[hour].push(price);
+      }
+    });
+
+    // Calculate hourly averages
+    const hourlyPrices = Array.from({ length: 24 }, (_, hour) => {
+      const values = hourlyData[hour] || [];
+      const avg = values.length > 0
+        ? values.reduce((a: number, b: number) => a + b, 0) / values.length
+        : 0;
+      return {
+        hour,
+        price: parseFloat(avg.toFixed(2)),
+      };
+    });
+
+    const validPrices = hourlyPrices.map(h => h.price).filter(p => p > 0);
+    const avgPrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
+    const maxPrice = Math.max(...validPrices);
+    const minPrice = Math.min(...validPrices);
+    const currentHour = now.getHours();
+    const currentPrice = hourlyPrices[currentHour]?.price || avgPrice;
+
+    return c.json({
+      currentPrice: parseFloat(currentPrice.toFixed(2)),
+      avgPrice: parseFloat(avgPrice.toFixed(2)),
+      maxPrice: parseFloat(maxPrice.toFixed(2)),
+      minPrice: parseFloat(minPrice.toFixed(2)),
+      hourlyPrices,
+      currency: 'EUR',
+      unit: 'MWh',
+      lastUpdate: now.toISOString(),
+    });
+  } catch (error) {
+    console.log(`Error in market-prices endpoint: ${error}`);
+    return c.json({ error: `Internal server error while fetching market prices: ${error.message}` }, 500);
+  }
+});
+
+// Old ENTSO-E market prices endpoint (kept for reference, not used)
+app.get("/make-server-cfbfb431/market-prices-entsoe", async (c) => {
   try {
     const apiToken = Deno.env.get('ENTSOE_API_TOKEN');
 

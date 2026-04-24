@@ -55,19 +55,58 @@ function PriceMetric({ label, value, unit, color = 'white' }: {
 
 function PriceChart({ data }: { data: { hour: number; price: number }[] }) {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragPoint, setDragPoint] = useState<number | null>(null);
 
   if (data.length === 0) return null;
 
-  const prices = data.map(d => d.price);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  const validPrices = data.map(d => d.price).filter(p => p > 0);
+  const minPrice = Math.min(...validPrices);
+  const maxPrice = Math.max(...validPrices);
   const priceRange = maxPrice - minPrice;
   const currentHour = new Date().getHours();
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const index = Math.round(percentage * (data.length - 1));
+
+    if (index >= 0 && index < data.length) {
+      if (isDragging) {
+        setDragPoint(index);
+      }
+      setHoveredPoint(index);
+    }
+  };
+
+  const handleMouseDown = () => {
+    setIsDragging(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragPoint(null);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isDragging) {
+      setHoveredPoint(null);
+    }
+  };
+
+  const displayPoint = dragPoint !== null ? dragPoint : hoveredPoint;
 
   return (
     <div className="bg-[rgba(8,12,22,0.5)] content-stretch relative rounded-[18px] w-full h-[140px]">
       <div aria-hidden="true" className="absolute border border-[rgba(37,53,79,0.7)] border-solid inset-0 pointer-events-none rounded-[18px]" />
-      <div className="relative w-full h-full p-[16px]">
+      <div
+        className="relative w-full h-full p-[16px] cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+      >
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
             <linearGradient id="priceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -92,7 +131,7 @@ function PriceChart({ data }: { data: { hour: number; price: number }[] }) {
             fill="none"
           />
           {/* Current hour indicator */}
-          {currentHour < data.length && (
+          {currentHour < data.length && displayPoint !== currentHour && (
             <line
               x1={(currentHour / (data.length - 1)) * 100}
               y1="0"
@@ -101,37 +140,55 @@ function PriceChart({ data }: { data: { hour: number; price: number }[] }) {
               stroke="#3BD9A4"
               strokeWidth="0.5"
               strokeDasharray="2,2"
-              opacity="0.6"
+              opacity="0.4"
+            />
+          )}
+          {/* Hovered/Dragged hour indicator */}
+          {displayPoint !== null && (
+            <line
+              x1={(displayPoint / (data.length - 1)) * 100}
+              y1="0"
+              x2={(displayPoint / (data.length - 1)) * 100}
+              y2="100"
+              stroke="#3BD9A4"
+              strokeWidth="0.8"
+              strokeDasharray="2,2"
+              opacity="0.8"
             />
           )}
           {/* Points */}
-          {data.map((d, i) => (
-            <circle
-              key={i}
-              cx={(i / (data.length - 1)) * 100}
-              cy={100 - ((d.price - minPrice) / priceRange) * 80}
-              r={hoveredPoint === i ? "1.5" : i === currentHour ? "1.2" : "0.6"}
-              fill={hoveredPoint === i ? "#3BD9A4" : i === currentHour ? "#3BD9A4" : "#44B4FF"}
-              onMouseEnter={() => setHoveredPoint(i)}
-              onMouseLeave={() => setHoveredPoint(null)}
-              style={{ cursor: 'pointer', transition: 'all 0.2s' }}
-            />
-          ))}
+          {data.map((d, i) => {
+            const isActive = displayPoint === i;
+            const isCurrent = i === currentHour;
+            return (
+              <circle
+                key={i}
+                cx={(i / (data.length - 1)) * 100}
+                cy={100 - ((d.price - minPrice) / priceRange) * 80}
+                r={isActive ? "1.8" : isCurrent ? "1.2" : "0.6"}
+                fill={isActive ? "#3BD9A4" : isCurrent ? "#3BD9A4" : "#44B4FF"}
+                style={{ transition: 'all 0.15s' }}
+              />
+            );
+          })}
         </svg>
-        {hoveredPoint !== null && (
+        {displayPoint !== null && data[displayPoint] && (
           <div
-            className="absolute bg-[#162033] border border-[#44b4ff] rounded-[8px] px-[10px] py-[6px] pointer-events-none z-10"
+            className="absolute bg-[#162033] border border-[#44b4ff] rounded-[8px] px-[12px] py-[8px] pointer-events-none z-10 shadow-lg"
             style={{
-              left: `${(hoveredPoint / (data.length - 1)) * 100}%`,
-              top: `${100 - ((data[hoveredPoint].price - minPrice) / priceRange) * 80}%`,
+              left: `${(displayPoint / (data.length - 1)) * 100}%`,
+              top: `${Math.max(10, 100 - ((data[displayPoint].price - minPrice) / priceRange) * 80)}%`,
               transform: 'translate(-50%, -120%)',
             }}
           >
-            <p className="text-[#ecf4ff] text-[11px] font-['IBM_Plex_Sans:Bold',sans-serif]">
-              {String(hoveredPoint).padStart(2, '0')}:00
+            <p className="text-[#ecf4ff] text-[11px] font-['IBM_Plex_Sans:Bold',sans-serif] mb-[2px]">
+              {String(displayPoint).padStart(2, '0')}:00 {displayPoint === currentHour ? '(Now)' : ''}
             </p>
-            <p className="text-[#44b4ff] text-[12px] font-['IBM_Plex_Sans:Bold',sans-serif]">
-              €{data[hoveredPoint].price.toFixed(2)}/MWh
+            <p className="text-[#44b4ff] text-[13px] font-['IBM_Plex_Sans:Bold',sans-serif]">
+              €{data[displayPoint].price.toFixed(2)}/MWh
+            </p>
+            <p className="text-[#7c93b4] text-[10px] font-['IBM_Plex_Sans:Regular',sans-serif] mt-[2px]">
+              {isDragging ? 'Dragging...' : 'Click & drag'}
             </p>
           </div>
         )}
@@ -152,14 +209,14 @@ export default function MarketPriceCard() {
 
       try {
         // Load CSV file
-        const response = await fetch('/src/imports/GUI_FLOWBASED_CONGESTION_INCOME_R3_DAY_AHEAD_202604200000-202604210000.csv');
+        const response = await fetch('/src/imports/energy-charts_Electricity_production_and_spot_prices_in_Romania_in_week_17_2026.csv');
 
         if (!response.ok) {
           throw new Error('Failed to load price data');
         }
 
         const csvText = await response.text();
-        const lines = csvText.split('\n').slice(1); // Skip header
+        const lines = csvText.split('\n').slice(3); // Skip first 3 lines (disclaimer, header, units)
 
         // Parse CSV and aggregate by hour
         const hourlyData: { [hour: number]: number[] } = {};
@@ -167,43 +224,52 @@ export default function MarketPriceCard() {
         lines.forEach(line => {
           if (!line.trim()) return;
 
-          const match = line.match(/"([^"]+)","([^"]+)","([^"]+)","([^"]+)","([^"]+)"/);
+          // Better CSV parsing - handle quotes properly
+          const match = line.match(/^"?([^"]+)"?,([^,]+),([^,]+),([^,]+),([^,]+)/);
           if (!match) return;
 
-          const timeStr = match[4]; // MTU column
-          const revenue = parseFloat(match[5]); // Revenue column
+          const dateTimeStr = match[1];
+          const priceStr = match[5];
+          const price = parseFloat(priceStr);
 
-          // Extract hour from time string like "20/04/2026 14:00 - 20/04/2026 14:15"
-          const hourMatch = timeStr.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
+          if (!dateTimeStr || isNaN(price) || price <= 0) return;
+
+          // Extract hour from ISO datetime like "2026-04-20T14:00+03:00"
+          const hourMatch = dateTimeStr.match(/T(\d{2}):/);
           if (!hourMatch) return;
 
-          const hour = parseInt(hourMatch[4]);
+          const hour = parseInt(hourMatch[1]);
 
           if (!hourlyData[hour]) {
             hourlyData[hour] = [];
           }
-          hourlyData[hour].push(revenue);
+          hourlyData[hour].push(price);
         });
 
-        // Calculate average for each hour and convert to positive prices
-        // (congestion revenue is negative, we'll show absolute values as "prices")
+        // Calculate average for each hour
         const hourlyPrices = Array.from({ length: 24 }, (_, hour) => {
           const values = hourlyData[hour] || [];
           const avg = values.length > 0
-            ? Math.abs(values.reduce((a, b) => a + b, 0) / values.length)
-            : 50; // Default fallback
+            ? values.reduce((a, b) => a + b, 0) / values.length
+            : 0;
           return {
             hour,
             price: parseFloat(avg.toFixed(2)),
           };
         });
 
-        const prices = hourlyPrices.map(h => h.price);
-        const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
-        const maxPrice = Math.max(...prices);
-        const minPrice = Math.min(...prices);
+        const validPrices = hourlyPrices.map(h => h.price).filter(p => p > 0);
+
+        // Ensure we have valid data
+        if (validPrices.length === 0) {
+          throw new Error('No valid price data found in CSV');
+        }
+
+        const avgPrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
+        const maxPrice = Math.max(...validPrices);
+        const minPrice = Math.min(...validPrices);
         const currentHour = new Date().getHours();
-        const currentPrice = hourlyPrices[currentHour]?.price || avgPrice;
+        const currentPrice = hourlyPrices[currentHour]?.price > 0 ? hourlyPrices[currentHour].price : avgPrice;
 
         setPriceData({
           currentPrice: parseFloat(currentPrice.toFixed(2)),
@@ -267,7 +333,7 @@ export default function MarketPriceCard() {
             Market Price Overview
           </p>
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.35] relative shrink-0 text-[#7c93b4] text-[12px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Congestion revenue analysis for Romania
+            Romania day-ahead electricity auction prices
           </p>
         </div>
         <div className={`${isPriceUp ? 'bg-[rgba(255,107,107,0.16)]' : 'bg-[rgba(59,217,164,0.16)]'} content-stretch flex items-center gap-[6px] justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0`}>
@@ -316,17 +382,17 @@ export default function MarketPriceCard() {
       {/* Footer */}
       <div className="content-stretch flex items-center justify-between relative shrink-0 w-full pt-[8px] border-t border-[rgba(37,53,79,0.5)]">
         <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#a5b9d9] text-[11px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-          Congestion income data for April 20, 2026
+          Romania week 17, 2026 - Energy-Charts data
         </p>
         <a
-          href="https://transparency.entsoe.eu/"
+          href="https://energy-charts.info/charts/price_spot_market/chart.htm?l=en&c=RO"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-[rgba(22,32,51,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0 hover:bg-[rgba(22,32,51,0.28)] transition-colors cursor-pointer"
         >
           <div aria-hidden="true" className="absolute border border-[rgba(37,53,79,0.6)] border-solid inset-0 pointer-events-none rounded-[999px]" />
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#7c93b4] text-[11px] whitespace-nowrap" style={{ fontVariationSettings: "'wdth' 100" }}>
-            ENTSO-E
+            Energy-Charts
           </p>
         </a>
       </div>

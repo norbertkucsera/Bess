@@ -1,15 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import svgPaths from '../../imports/BatteryAvailability/svg-2aay79c73u';
-import { projectId, publicAnonKey } from '../../../utils/supabase/info';
-
-interface BatteryData {
-  totalCapacity: number;
-  currentCharge: number;
-  availableDischarge: number;
-  availableCharge: number;
-  status: string;
-  power: number;
-}
 
 function MetricCard({ title, value, color = 'white' }: { title: string; value: string; color?: 'white' | 'green' }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -153,82 +143,6 @@ function BatteryMiniChart() {
 }
 
 export default function BatteryAvailabilityCard() {
-  const [batteryData, setBatteryData] = useState<BatteryData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchBatteryData() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/make-server-cfbfb431/battery-data`,
-          {
-            headers: {
-              'Authorization': `Bearer ${publicAnonKey}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Error fetching battery data:', errorData);
-          throw new Error(errorData.error || 'Failed to fetch battery data');
-        }
-
-        const data = await response.json();
-        setBatteryData(data);
-      } catch (err) {
-        console.error('Battery data fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load battery data');
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchBatteryData();
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchBatteryData, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Show loading skeleton
-  if (isLoading && !batteryData) {
-    return (
-      <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] size-full">
-        <div aria-hidden="true" className="absolute border border-[#25354f] border-solid inset-0 pointer-events-none rounded-[24px] shadow-[0px_18px_32px_0px_rgba(0,29,48,0.16)]" />
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="animate-pulse flex flex-col gap-[12px] w-full">
-            <div className="h-[40px] bg-[rgba(37,53,79,0.3)] rounded-[12px]" />
-            <div className="h-[60px] bg-[rgba(37,53,79,0.3)] rounded-[12px]" />
-            <div className="h-[60px] bg-[rgba(37,53,79,0.3)] rounded-[12px]" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] size-full">
-        <div aria-hidden="true" className="absolute border border-[#25354f] border-solid inset-0 pointer-events-none rounded-[24px] shadow-[0px_18px_32px_0px_rgba(0,29,48,0.16)]" />
-        <div className="w-full h-full flex items-center justify-center flex-col gap-[12px]">
-          <p className="text-[#ff6b6b] text-[14px] font-['IBM_Plex_Sans:Medium',sans-serif]">Failed to load battery data</p>
-          <p className="text-[#7c93b4] text-[12px] font-['IBM_Plex_Sans:Regular',sans-serif]">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  const capacity = batteryData?.totalCapacity || 38;
-  const charge = batteryData?.currentCharge || 64;
-  const discharge = batteryData?.availableDischarge || 21.4;
-  const chargeCapacity = batteryData?.availableCharge || 13.7;
-  const status = batteryData?.status || 'Connected';
-
   return (
     <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] size-full">
       <div aria-hidden="true" className="absolute border border-[#25354f] border-solid inset-0 pointer-events-none rounded-[24px] shadow-[0px_18px_32px_0px_rgba(0,29,48,0.16)]" />
@@ -240,28 +154,28 @@ export default function BatteryAvailabilityCard() {
             Battery Availability
           </p>
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.35] relative shrink-0 text-[#7c93b4] text-[12px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Connected via Envitron
+            Connected via Withthegrid
           </p>
         </div>
         <div className="bg-[rgba(59,217,164,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0">
           <div aria-hidden="true" className="absolute border border-[rgba(59,217,164,0.6)] border-solid inset-0 pointer-events-none rounded-[999px]" />
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#3bd9a4] text-[12px] whitespace-nowrap" style={{ fontVariationSettings: "'wdth' 100" }}>
-            {isLoading ? 'Updating...' : 'Ready to discharge'}
+            Ready to discharge
           </p>
         </div>
       </div>
 
       {/* Primary Metrics */}
       <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
-        <MetricCard title="Total battery capacity" value={`${capacity} MWh`} />
-        <MetricCard title="Current state of charge" value={`${charge}%`} color="green" />
-        <MetricCard title="Available discharge" value={`${discharge} MWh`} />
+        <MetricCard title="Total battery capacity" value="38 MWh" />
+        <MetricCard title="Current state of charge" value="64%" color="green" />
+        <MetricCard title="Available discharge" value="21.4 MWh" />
       </div>
 
       {/* Secondary Metrics */}
       <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
-        <SecondaryMetric title="Available charge capacity" value={`${chargeCapacity} MWh`} />
-        <SecondaryMetric title="Battery status" value={status} />
+        <SecondaryMetric title="Available charge capacity" value="13.7 MWh" />
+        <SecondaryMetric title="Battery status" value="Connected via Withthegrid" />
       </div>
 
       {/* Battery Mini Chart */}
@@ -272,17 +186,12 @@ export default function BatteryAvailabilityCard() {
         <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#a5b9d9] text-[12px] w-[330px]" style={{ fontVariationSettings: "'wdth' 100" }}>
           Charge overnight when prices are low, preserve the best discharge window for the evening peak.
         </p>
-        <a
-          href="https://portal.envitron.nl/overview"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-[rgba(22,32,51,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0 hover:bg-[rgba(22,32,51,0.28)] transition-colors cursor-pointer"
-        >
+        <div className="bg-[rgba(22,32,51,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0 hover:bg-[rgba(22,32,51,0.28)] transition-colors cursor-pointer">
           <div aria-hidden="true" className="absolute border border-[rgba(37,53,79,0.6)] border-solid inset-0 pointer-events-none rounded-[999px]" />
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#7c93b4] text-[12px] whitespace-nowrap" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Envitron
+            Withthegrid
           </p>
-        </a>
+        </div>
       </div>
     </div>
   );

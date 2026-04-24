@@ -5,6 +5,8 @@ import BatteryAvailabilityCard from './BatteryAvailabilityCard';
 import WeatherImpactCard from './WeatherImpactCard';
 import CalendarEventsCard from './CalendarEventsCard';
 import MarketPriceCard from './MarketPriceCard';
+import RiskImbalanceCard from './RiskImbalanceCard';
+import FinancialImpactCard from './FinancialImpactCard';
 
 interface DashboardMainProps {
   selectedPortfolio: string;
@@ -163,8 +165,12 @@ export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: Dashb
 
         {/* Row 4: Risk & Imbalance Alert + Financial Impact */}
         <div className="grid grid-cols-2 gap-[20px]">
-          <PlaceholderCard title="Risk & Imbalance Alert" />
-          <PlaceholderCard title="Financial Impact" />
+          <div className="h-[380px]">
+            <RiskImbalanceCard />
+          </div>
+          <div className="h-[380px]">
+            <FinancialImpactCard />
+          </div>
         </div>
 
         {/* Row 5: Hourly Energy Position Summary - Full Width */}
