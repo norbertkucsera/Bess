@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import svgPaths from '../../imports/BatteryAvailability/svg-2aay79c73u';
 
 function MetricCard({ title, value, color = 'white' }: { title: string; value: string; color?: 'white' | 'green' }) {
@@ -143,6 +143,31 @@ function BatteryMiniChart() {
 }
 
 export default function BatteryAvailabilityCard() {
+  const [stateOfCharge, setStateOfCharge] = useState(64);
+  const [direction, setDirection] = useState<'down' | 'up'>('down');
+  const isReadyToCharge = stateOfCharge <= 60;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStateOfCharge(prev => {
+        if (direction === 'down') {
+          if (prev <= 20) {
+            setDirection('up');
+            return prev + 1;
+          }
+          return prev - 1;
+        } else {
+          if (prev >= 64) {
+            setDirection('down');
+            return prev - 1;
+          }
+          return prev + 1;
+        }
+      });
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [direction]);
+
   return (
     <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] size-full">
       <div aria-hidden="true" className="absolute border border-[#25354f] border-solid inset-0 pointer-events-none rounded-[24px] shadow-[0px_18px_32px_0px_rgba(0,29,48,0.16)]" />
@@ -157,10 +182,10 @@ export default function BatteryAvailabilityCard() {
             Connected via Withthegrid
           </p>
         </div>
-        <div className="bg-[rgba(59,217,164,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0">
-          <div aria-hidden="true" className="absolute border border-[rgba(59,217,164,0.6)] border-solid inset-0 pointer-events-none rounded-[999px]" />
-          <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#3bd9a4] text-[12px] whitespace-nowrap" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Ready to discharge
+        <div className={`content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0 ${isReadyToCharge ? 'bg-[rgba(247,188,89,0.16)]' : 'bg-[rgba(59,217,164,0.16)]'}`}>
+          <div aria-hidden="true" className={`absolute border border-solid inset-0 pointer-events-none rounded-[999px] ${isReadyToCharge ? 'border-[rgba(247,188,89,0.6)]' : 'border-[rgba(59,217,164,0.6)]'}`} />
+          <p className={`font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[12px] whitespace-nowrap ${isReadyToCharge ? 'text-[#F7BC59]' : 'text-[#3bd9a4]'}`} style={{ fontVariationSettings: "'wdth' 100" }}>
+            {isReadyToCharge ? 'Ready to charge' : 'Ready to discharge'}
           </p>
         </div>
       </div>
@@ -168,7 +193,7 @@ export default function BatteryAvailabilityCard() {
       {/* Primary Metrics */}
       <div className="content-stretch flex gap-[12px] items-start relative shrink-0 w-full">
         <MetricCard title="Total battery capacity" value="38 MWh" />
-        <MetricCard title="Current state of charge" value="64%" color="green" />
+        <MetricCard title="Current state of charge" value={`${stateOfCharge}%`} color="green" />
         <MetricCard title="Available discharge" value="21.4 MWh" />
       </div>
 
