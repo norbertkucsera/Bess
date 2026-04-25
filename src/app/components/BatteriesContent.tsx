@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { TimeHorizon } from '../types';
 
 function Header() {
   return (
@@ -112,7 +113,13 @@ function BatteryCard({
   );
 }
 
-export function BatteriesContent() {
+const productionHints: Record<TimeHorizon, string> = {
+  Tomorrow: 'Tomorrow’s solar production is projected high, recommend charging during late morning and discharging at evening peak.',
+  'Next Week': 'Weekly production outlook is strong, use mid-day solar to charge and preserve evening reserve.',
+  'Next Month': 'Monthly output supports a higher charge window; reserve 20% capacity for expected peak events.',
+};
+
+export function BatteriesContent({ timeHorizon }: { timeHorizon: TimeHorizon }) {
   const batteries = [
     { name: 'BESS Unit 1', capacity: '75.0', currentCharge: 85, status: 'active' as const, location: 'Cluj-Napoca North' },
     { name: 'BESS Unit 2', capacity: '75.0', currentCharge: 68, status: 'charging' as const, location: 'Cluj-Napoca South' },
@@ -146,7 +153,7 @@ export function BatteriesContent() {
             </div>
             <div>
               <p className="font-['IBM_Plex_Sans:Medium',sans-serif] text-[#7c93b4] text-[12px] mb-[8px]">Active Units</p>
-              <p className="font-['Sora:Bold',sans-serif] text-[#ecf4ff] text-[32px]">{batteries.filter(b => b.status === 'active').length}</p>
+              <p className="font-['Sora:Bold',sans-serif] text-[#ecf4ff] text-[32px]">{batteries.filter((b) => b.status === 'active').length}</p>
               <p className="font-['IBM_Plex_Sans:Medium',sans-serif] text-[#7c93b4] text-[14px]">of {batteries.length}</p>
             </div>
           </div>
@@ -156,6 +163,23 @@ export function BatteriesContent() {
           {batteries.map((battery, i) => (
             <BatteryCard key={i} {...battery} />
           ))}
+        </div>
+
+        <div className="mt-[24px] grid gap-[24px] xl:grid-cols-2">
+          <div className="rounded-[24px] bg-[#121a2a] border border-[#25354f] p-[24px]">
+            <p className="font-['Sora:Bold',sans-serif] text-[#ecf4ff] text-[18px] mb-[10px]">Battery behavior correlated with local production</p>
+            <p className="font-['IBM_Plex_Sans:Medium',sans-serif] text-[#7c93b4] text-[13px] leading-[1.7]">
+              {productionHints[timeHorizon]}
+            </p>
+          </div>
+          <div className="rounded-[24px] bg-[#121a2a] border border-[#25354f] p-[24px]">
+            <p className="font-['Sora:Bold',sans-serif] text-[#ecf4ff] text-[18px] mb-[10px]">Recommended battery plan</p>
+            <ul className="list-disc pl-[20px] space-y-[10px] text-[#a5b9d9] text-[13px] leading-[1.8]">
+              <li>Charge batteries when local production is strong and market prices are low.</li>
+              <li>Reserve at least 20% capacity for evening peaks and event-driven demand spikes.</li>
+              <li>Discharge stored energy during high-price windows to maximize revenue.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

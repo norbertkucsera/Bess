@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import svgPaths from '../../imports/TomorrowDemandForecast/svg-pp7b5v0m87';
+import { TimeHorizon } from '../types';
 
 function MetricCard({ title, value, color = 'white' }: { title: string; value: string; color?: 'white' | 'green' }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -140,7 +141,14 @@ function SourcePill({ label }: { label: string }) {
   );
 }
 
-export default function TomorrowDemandCard() {
+export default function TomorrowDemandCard({ timeHorizon }: { timeHorizon: TimeHorizon }) {
+  const headerLabel = timeHorizon === 'Tomorrow' ? 'Tomorrow Demand Forecast' : timeHorizon === 'Next Week' ? 'Weekly Demand Forecast' : 'Monthly Demand Forecast';
+  const description = timeHorizon === 'Tomorrow'
+    ? 'Based on historical consumption, weather, calendar and events'
+    : timeHorizon === 'Next Week'
+    ? 'Weekly demand forecast for energy procurement planning'
+    : 'Monthly aggregated demand view with event and weather signals';
+
   return (
     <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] size-full">
       <div aria-hidden="true" className="absolute border border-[#25354f] border-solid inset-0 pointer-events-none rounded-[24px] shadow-[0px_18px_32px_0px_rgba(0,29,48,0.16)]" />
@@ -149,10 +157,10 @@ export default function TomorrowDemandCard() {
       <div className="content-stretch flex items-start justify-between relative shrink-0 w-full">
         <div className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 whitespace-nowrap">
           <p className="font-['Sora:SemiBold',sans-serif] font-semibold leading-[1.12] relative shrink-0 text-[#ecf4ff] text-[17px]">
-            Tomorrow Demand Forecast
+            {headerLabel}
           </p>
           <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.35] relative shrink-0 text-[#7c93b4] text-[12px]" style={{ fontVariationSettings: "'wdth' 100" }}>
-            Based on historical consumption, weather, calendar and events
+            {description}
           </p>
         </div>
         <div className="bg-[rgba(68,180,255,0.16)] content-stretch flex items-center justify-center px-[10px] py-[6px] relative rounded-[999px] shrink-0">

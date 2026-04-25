@@ -1,18 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import InteractiveAiHero from './InteractiveAiHero';
 import TomorrowDemandCard from './TomorrowDemandCard';
 import BatteryAvailabilityCard from './BatteryAvailabilityCard';
+import LocalProductionForecastCard from './LocalProductionForecastCard';
 import WeatherImpactCard from './WeatherImpactCard';
 import CalendarEventsCard from './CalendarEventsCard';
 import MarketPriceCard from './MarketPriceCard';
 import RiskImbalanceCard from './RiskImbalanceCard';
 import FinancialImpactCard from './FinancialImpactCard';
-
-export type TimeHorizon = 'Tomorrow' | 'Next Week' | 'Next Month';
+import { TimeHorizon } from '../types';
 
 interface DashboardMainProps {
   selectedPortfolio: string;
   setSelectedPortfolio: (portfolio: string) => void;
+  timeHorizon: TimeHorizon;
+  setTimeHorizon: (timeHorizon: TimeHorizon) => void;
 }
 
 function TitleStack() {
@@ -65,7 +67,7 @@ function Controls({
   selectedPortfolio,
   setSelectedPortfolio,
   timeHorizon,
-  setTimeHorizon
+  setTimeHorizon,
 }: {
   selectedPortfolio: string;
   setSelectedPortfolio: (p: string) => void;
@@ -131,7 +133,7 @@ function Header({
   selectedPortfolio,
   setSelectedPortfolio,
   timeHorizon,
-  setTimeHorizon
+  setTimeHorizon,
 }: {
   selectedPortfolio: string;
   setSelectedPortfolio: (p: string) => void;
@@ -151,7 +153,6 @@ function Header({
   );
 }
 
-// Placeholder components for upcoming cards
 function PlaceholderCard({ title }: { title: string }) {
   return (
     <div className="bg-[#121a2a] content-stretch flex flex-col gap-[16px] items-start px-[20px] py-[18px] relative rounded-[24px] shrink-0">
@@ -166,8 +167,114 @@ function PlaceholderCard({ title }: { title: string }) {
   );
 }
 
-export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: DashboardMainProps) {
-  const [timeHorizon, setTimeHorizon] = useState<TimeHorizon>('Tomorrow');
+interface CardItem {
+  id: string;
+  span: 1 | 2;
+  component: React.ReactNode;
+}
+
+const CARD_ORDER_STORAGE_KEY = 'dashboard-card-order-v1';
+
+export function DashboardMain({
+  selectedPortfolio,
+  setSelectedPortfolio,
+  timeHorizon,
+  setTimeHorizon,
+}: DashboardMainProps) {
+  const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [cardOrder, setCardOrder] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const stored = window.localStorage.getItem(CARD_ORDER_STORAGE_KEY);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored) as string[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const cards: Record<string, CardItem> = {
+    hero: { id: 'hero', span: 2, component: <InteractiveAiHero /> },
+    demand: {
+      id: 'demand',
+      span: 1,
+      component: <TomorrowDemandCard timeHorizon={timeHorizon} />,
+    },
+    battery: {
+      id: 'battery',
+      span: 1,
+      component: <BatteryAvailabilityCard />,
+    },
+    production: {
+      id: 'production',
+      span: 1,
+      component: <LocalProductionForecastCard timeHorizon={timeHorizon} />,
+    },
+    weather: {
+      id: 'weather',
+      span: 1,
+      component: <WeatherImpactCard />,
+    },
+    calendar: { id: 'calendar', span: 1, component: <CalendarEventsCard /> },
+    market: { id: 'market', span: 1, component: <MarketPriceCard /> },
+    risk: { id: 'risk', span: 1, component: <RiskImbalanceCard /> },
+    financial: { id: 'financial', span: 1, component: <FinancialImpactCard /> },
+    hourly: { id: 'hourly', span: 2, component: <PlaceholderCard title="Hourly Energy Position Summary" /> },
+  };
+
+  const defaultOrder = [
+    'hero',
+    'demand',
+    'battery',
+    'production',
+    'weather',
+    'calendar',
+    'market',
+    'risk',
+    'financial',
+    'hourly',
+  ];
+
+  useEffect(() => {
+    if (cardOrder.length === 0) {
+      setCardOrder(defaultOrder);
+      return;
+    }
+    const validOrder = cardOrder.filter((id) => Object.keys(cards).includes(id));
+    if (validOrder.length !== cardOrder.length) {
+      setCardOrder(defaultOrder);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cardOrder.length > 0) {
+      window.localStorage.setItem(CARD_ORDER_STORAGE_KEY, JSON.stringify(cardOrder));
+    }
+  }, [cardOrder]);
+
+  const handleDragStart = (id: string, event: React.DragEvent<HTMLDivElement>) => {
+    event.dataTransfer.effectAllowed = 'move';
+    setDraggedId(id);
+  };
+
+  const handleDrop = (targetId: string) => {
+    if (!draggedId || draggedId === targetId) return;
+    setCardOrder((currentOrder) => {
+      const nextOrder = [...currentOrder];
+      const fromIndex = nextOrder.indexOf(draggedId);
+      const toIndex = nextOrder.indexOf(targetId);
+      if (fromIndex === -1 || toIndex === -1) return nextOrder;
+      nextOrder.splice(fromIndex, 1);
+      nextOrder.splice(toIndex, 0, draggedId);
+      return nextOrder;
+    });
+    setDraggedId(null);
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+  };
 
   return (
     <div className="w-full min-h-screen px-[40px] py-[38px]">
@@ -178,53 +285,27 @@ export function DashboardMain({ selectedPortfolio, setSelectedPortfolio }: Dashb
         setTimeHorizon={setTimeHorizon}
       />
 
-      {/* Card Grid */}
-      <div className="flex flex-col gap-[20px]">
-        {/* AI Recommendation Hero - Full Width */}
-        <div className="w-full h-[312px]">
-          <InteractiveAiHero />
-        </div>
-
-        {/* Row 1: Tomorrow Demand Forecast + Battery Availability */}
-        <div className="grid grid-cols-2 gap-[20px]">
-          <div className="h-[380px]">
-            <TomorrowDemandCard />
-          </div>
-          <div className="h-[380px]">
-            <BatteryAvailabilityCard />
-          </div>
-        </div>
-
-        {/* Row 2: Local Production Forecast + Weather Impact */}
-        <div className="grid grid-cols-2 gap-[20px]">
-          <PlaceholderCard title="Local Production Forecast" />
-          <div className="h-[380px]">
-            <WeatherImpactCard />
-          </div>
-        </div>
-
-        {/* Row 3: Calendar & Event Impact + Market Price Overview */}
-        <div className="grid grid-cols-2 gap-[20px]">
-          <div className="h-[380px]">
-            <CalendarEventsCard />
-          </div>
-          <div className="h-[380px]">
-            <MarketPriceCard />
-          </div>
-        </div>
-
-        {/* Row 4: Risk & Imbalance Alert + Financial Impact */}
-        <div className="grid grid-cols-2 gap-[20px]">
-          <div className="h-[380px]">
-            <RiskImbalanceCard />
-          </div>
-          <div className="h-[380px]">
-            <FinancialImpactCard />
-          </div>
-        </div>
-
-        {/* Row 5: Hourly Energy Position Summary - Full Width */}
-        <PlaceholderCard title="Hourly Energy Position Summary" />
+      <div className="grid grid-cols-2 gap-[20px]">
+        {cardOrder.map((cardId) => {
+          const card = cards[cardId];
+          if (!card) return null;
+          return (
+            <div
+              key={card.id}
+              draggable
+              onDragStart={(event) => handleDragStart(card.id, event)}
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(card.id)}
+              onDragEnd={() => setDraggedId(null)}
+              className={`${card.span === 2 ? 'col-span-2' : ''} relative rounded-[28px] transition-all ${draggedId === card.id ? 'opacity-80 border border-dashed border-[#3bd9a4]' : ''}`}
+            >
+              <div className="absolute right-[10px] top-[10px] z-10 rounded-full bg-[rgba(0,0,0,0.35)] p-[8px] text-[#7c93b4] text-[12px] font-['IBM_Plex_Sans:Medium',sans-serif]">
+                Drag
+              </div>
+              {card.component}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

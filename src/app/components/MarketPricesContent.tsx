@@ -1,12 +1,13 @@
 import { useState } from 'react';
+import { TimeHorizon } from '../types';
 
-function Header() {
+function Header({ timeHorizon }: { timeHorizon: TimeHorizon }) {
   return (
     <div className="px-[40px] py-[38px]">
       <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0">
         <p className="font-['Sora:Bold',sans-serif] font-bold leading-[1.1] relative shrink-0 text-[#ecf4ff] text-[30px]">Market Prices</p>
         <p className="font-['IBM_Plex_Sans:Medium',sans-serif] font-medium leading-[1.2] relative shrink-0 text-[#a5b9d9] text-[14px]">
-          Real-time energy market pricing and trends
+          {timeHorizon} pricing and spot market trends
         </p>
       </div>
     </div>
@@ -186,10 +187,10 @@ function PriceComparisonTable() {
   );
 }
 
-export function MarketPricesContent() {
+export function MarketPricesContent({ timeHorizon }: { timeHorizon: TimeHorizon }) {
   return (
     <div className="w-full">
-      <Header />
+      <Header timeHorizon={timeHorizon} />
       <div className="px-[40px] pb-[40px] flex flex-col gap-[24px]">
         <LivePriceCard />
         <PriceComparisonTable />
